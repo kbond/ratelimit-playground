@@ -9,15 +9,19 @@ abstract class RateLimiter
 {
     protected $redis;
     protected $key;
+    protected int $limit;
+    protected int $duration;
 
-    public function __construct()
+    public function __construct(int $limit, int $duration)
     {
         $this->redis = new \Redis();
         $this->redis->connect('localhost');
-        $this->key = strtolower(static::class);
+        $this->key = strtolower((new \ReflectionClass(static::class))->getShortName());
+        $this->limit = $limit;
+        $this->duration = $duration;
     }
 
-    abstract public function hit(int $limit, int $duration): RateLimit;
+    abstract public function hit(): bool;
 
     public function reset(): void
     {

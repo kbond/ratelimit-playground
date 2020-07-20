@@ -7,15 +7,15 @@ namespace RateLimit;
  */
 final class FixedWindow extends RateLimiter
 {
-    public function hit(int $limit, int $duration): RateLimit
+    public function hit(): bool
     {
         $count = $this->redis->hIncrBy($this->key, 'count', 1);
 
         if (1 === $count) {
-            $this->redis->hSet($this->key, 'end', time() + $duration);
-            $this->redis->expire($this->key, $duration);
+            $this->redis->hSet($this->key, 'end', time() + $this->duration);
+            $this->redis->expire($this->key, $this->duration);
         }
 
-        return new RateLimit($limit, $count, $this->redis->hGet($this->key, 'end') - time());
+        return $count <= $this->limit;
     }
 }
