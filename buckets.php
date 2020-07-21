@@ -14,13 +14,23 @@ foreach ($limiters as $limiter) {
     $limiter->reset();
 }
 
-$hitAll = function(int $num) use ($limiters) {
-    foreach ($limiters as $limiter) {
+$burstDetector = [];
+
+$hitAll = function(int $num) use ($limiters, &$burstDetector) {
+    foreach ($limiters as $key => $limiter) {
         if (!$limiter->hit()) {
             continue;
         }
 
-        echo sprintf("%s\t%s\t%s\n", $num, (new ReflectionClass($limiter))->getShortName(), date('H:i:s'));
+        $burst = ($burstDetector[$key] ?? time()) === time();
+        $burstDetector[$key] = time();
+
+        echo sprintf("%s\t%s\t%s\t%s\n",
+            $num,
+            (new ReflectionClass($limiter))->getShortName(),
+            date('H:i:s'),
+            $burst ? '(burst)' : ''
+        );
     }
 };
 
