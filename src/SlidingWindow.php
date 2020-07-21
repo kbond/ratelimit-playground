@@ -22,6 +22,9 @@ final class SlidingWindow extends WindowRateLimiter
             local amount = redis.call('ZCARD', token)
             if amount < limit then
                 redis.call('ZADD', token, now, now)
+                amount = amount + 1
+            else
+                return -1
             end
             redis.call('EXPIRE', token, window)
             
@@ -30,10 +33,10 @@ final class SlidingWindow extends WindowRateLimiter
 
         $remaining = $this->redis->eval($script, [$this->key, microtime(true), $this->duration, $this->limit], 1);
 
-        if ($remaining > 0) {
-            return new RateLimit($remaining - 1);
+        if ($remaining < 0) {
+            throw new RateLimitExceeded();
         }
 
-        throw new RateLimitExceeded();
+        return new RateLimit($remaining);
     }
 }
