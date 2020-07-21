@@ -1,11 +1,13 @@
 <?php
 
 use RateLimit\LeakyBucketLimiter;
+use RateLimit\TokenBucketLimiter;
 
 require __DIR__.'/vendor/autoload.php';
 
 $limiters = [
     new LeakyBucketLimiter(5, 1, 1), // leak at 1 drip/sec
+    new TokenBucketLimiter(5, 1, 1), // fill at 1 token/sec
 ];
 
 foreach ($limiters as $limiter) {
