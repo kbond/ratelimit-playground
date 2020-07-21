@@ -1,6 +1,7 @@
 <?php
 
 use RateLimit\FixedWindow;
+use RateLimit\RateLimitExceeded;
 use RateLimit\SlidingWindow;
 use RateLimit\TokenBucket;
 
@@ -20,18 +21,21 @@ $burstDetector = [];
 
 $hitAll = function(int $num) use ($limiters, &$burstDetector) {
     foreach ($limiters as $key => $limiter) {
-        if (!$limiter->hit()) {
+        try {
+            $rateLimit = $limiter->hit();
+        } catch (RateLimitExceeded $e) {
             continue;
         }
 
         $burst = ($burstDetector[$key] ?? 0) === time();
         $burstDetector[$key] = time();
 
-        echo sprintf("%s\t%s\t%s\t%s\n",
+        echo sprintf("%s\t%s\t%s\t%s\t\tremaining=%d\n",
             $num,
             (new ReflectionClass($limiter))->getShortName(),
             date('H:i:s'),
-            $burst ? '(burst)' : ''
+            $burst ? '(burst)' : '',
+            $rateLimit->remaining()
         );
     }
 };

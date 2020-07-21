@@ -7,7 +7,7 @@ namespace RateLimit;
  */
 final class SlidingWindow extends WindowRateLimiter
 {
-    public function hit(): bool
+    public function hit(): RateLimit
     {
         // source: https://engagor.github.io/blog/2018/09/11/error-internal-rate-limit-reached/
         $script = "
@@ -30,6 +30,10 @@ final class SlidingWindow extends WindowRateLimiter
 
         $remaining = $this->redis->eval($script, [$this->key, microtime(true), $this->duration, $this->limit], 1);
 
-        return $remaining > 0;
+        if ($remaining > 0) {
+            return new RateLimit($remaining - 1);
+        }
+
+        throw new RateLimitExceeded();
     }
 }

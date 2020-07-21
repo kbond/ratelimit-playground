@@ -21,7 +21,7 @@ final class TokenBucket extends RateLimiter
         $this->fillRate = $fillRate;
     }
 
-    public function hit(): bool
+    public function hit(): RateLimit
     {
         $now = microtime(true);
 
@@ -47,10 +47,10 @@ final class TokenBucket extends RateLimiter
             // expire after "time to fill" based on current count
             $this->redis->expire($this->key, $this->timeToFill($tokens));
 
-            return true;
+            return new RateLimit($tokens);
         }
 
-        return false;
+        throw new RateLimitExceeded();
     }
 
     private function timeToFill(int $tokens): int

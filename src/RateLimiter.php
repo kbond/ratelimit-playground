@@ -17,7 +17,10 @@ abstract class RateLimiter
         $this->key = strtolower((new \ReflectionClass(static::class))->getShortName());
     }
 
-    abstract public function hit(): bool;
+    /**
+     * @throws RateLimitExceeded
+     */
+    abstract public function hit(): RateLimit;
 
     public function reset(): void
     {
