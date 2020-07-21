@@ -8,41 +8,41 @@ namespace RateLimit;
 final class LeakyBucketLimiter extends RateLimiter
 {
     private int $capacity;
-    private float $dripRate;
+    private float $emptyRate;
 
-    public function __construct(int $capacity, int $drips, int $seconds)
+    public function __construct(int $capacity, int $tokens, int $seconds)
     {
         parent::__construct();
 
         $this->capacity = $capacity;
-        $this->dripRate = $drips / $seconds;
+        $this->emptyRate = $tokens / $seconds;
     }
 
     public function hit(): bool
     {
         $now = microtime(true);
 
-        // get counter
-        $state = $this->redis->hGetAll($this->key);
+        // get bucket
+        $bucket = $this->redis->hGetAll($this->key);
 
-        // get count, set to 0 if empty
-        $count = $state['count'] ?? 0;
+        // get tokens, set to 0 if empty
+        $tokens = $bucket['tokens'] ?? 0;
 
         // get last modified, set to now if empty
-        $modified = $state['modified'] ?? $now;
+        $modified = $bucket['modified'] ?? $now;
 
-        // determine how many "drips" to remove since last modified based on drip rate
-        $count -= floor(($now - $modified) * $this->dripRate);
+        // determine how many tokens to remove since last modified based on empty rate
+        $tokens -= floor(($now - $modified) * $this->emptyRate);
 
-        if ($count < $this->capacity) { // bucket still has capacity
+        if ($tokens < $this->capacity) { // bucket still has capacity
             // increment count and set last modified
             $this->redis->hMSet($this->key, [
-                'count' => ++$count,
+                'tokens' => ++$tokens,
                 'modified' => $now
             ]);
 
             // expire after "time to empty" based on current count
-            $this->redis->expire($this->key, $this->timeToEmpty($count));
+            $this->redis->expire($this->key, $this->timeToEmpty($tokens));
 
             return true;
         }
@@ -50,8 +50,8 @@ final class LeakyBucketLimiter extends RateLimiter
         return false;
     }
 
-    private function timeToEmpty(int $count): int
+    private function timeToEmpty(int $tokens): int
     {
-        return ceil($count / $this->dripRate);
+        return ceil($tokens / $this->emptyRate);
     }
 }
