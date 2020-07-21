@@ -14,13 +14,13 @@ foreach ($limiters as $limiter) {
     $limiter->reset();
 }
 
-$hitAll = function(int $num, $type = null) use ($limiters) {
+$hitAll = function(int $num) use ($limiters) {
     foreach ($limiters as $limiter) {
         if (!$limiter->hit()) {
             continue;
         }
 
-        echo sprintf("%s\t%s\t%s\t%s\n", $num, (new ReflectionClass($limiter))->getShortName(), date('H:i:s'), $type);
+        echo sprintf("%s\t%s\t%s\n", $num, (new ReflectionClass($limiter))->getShortName(), date('H:i:s'));
     }
 };
 

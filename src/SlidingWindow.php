@@ -5,7 +5,7 @@ namespace RateLimit;
 /**
  * @author Kevin Bond <kevinbond@gmail.com>
  */
-final class SlidingWindow extends RateLimiter
+final class SlidingWindow extends WindowRateLimiter
 {
     public function hit(): bool
     {

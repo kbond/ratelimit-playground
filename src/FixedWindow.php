@@ -5,7 +5,7 @@ namespace RateLimit;
 /**
  * @author Kevin Bond <kevinbond@gmail.com>
  */
-final class FixedWindow extends RateLimiter
+final class FixedWindow extends WindowRateLimiter
 {
     public function hit(): bool
     {
