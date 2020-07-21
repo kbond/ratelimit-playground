@@ -1,12 +1,10 @@
 <?php
 
-use RateLimit\LeakyBucketLimiter;
 use RateLimit\TokenBucketLimiter;
 
 require __DIR__.'/vendor/autoload.php';
 
 $limiters = [
-    new LeakyBucketLimiter(5, 1, 1), // leak at 1 drip/sec
     new TokenBucketLimiter(5, 1, 1), // fill at 1 token/sec
 ];
 
@@ -47,7 +45,7 @@ while (true) {
     $hitAll(8);
     $hitAll(9);
 
-    sleep(2);
+    sleep(1);
     $hitAll(10);
     $hitAll(11);
     $hitAll(12);
