@@ -22,7 +22,7 @@ $hitAll = function(int $num) use ($limiters, &$burstDetector) {
             continue;
         }
 
-        $burst = ($burstDetector[$key] ?? time()) === time();
+        $burst = ($burstDetector[$key] ?? 0) === time();
         $burstDetector[$key] = time();
 
         echo sprintf("%s\t%s\t%s\t%s\n",
