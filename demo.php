@@ -2,12 +2,14 @@
 
 use RateLimit\FixedWindow;
 use RateLimit\SlidingWindow;
+use RateLimit\TokenBucket;
 
 require __DIR__.'/vendor/autoload.php';
 
 $limiters = [
     new FixedWindow(5, 10),
     new SlidingWindow(5, 10),
+    new TokenBucket(5, 5/10),
 ];
 
 foreach ($limiters as $limiter) {

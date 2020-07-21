@@ -1,11 +1,11 @@
 <?php
 
-use RateLimit\TokenBucketLimiter;
+use RateLimit\TokenBucket;
 
 require __DIR__.'/vendor/autoload.php';
 
 $limiters = [
-    new TokenBucketLimiter(5, 1, 1), // fill at 1 token/sec
+    new TokenBucket(5, 1/3), // fill at 1 token/sec
 ];
 
 foreach ($limiters as $limiter) {

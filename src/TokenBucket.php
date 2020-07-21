@@ -5,17 +5,20 @@ namespace RateLimit;
 /**
  * @author Kevin Bond <kevinbond@gmail.com>
  */
-final class TokenBucketLimiter extends RateLimiter
+final class TokenBucket extends RateLimiter
 {
     private int $burst;
     private float $fillRate;
 
-    public function __construct(int $burst, int $tokens, int $second)
+    /**
+     * @param float $fillRate Tokens/Second
+     */
+    public function __construct(int $burst, float $fillRate)
     {
         parent::__construct();
 
         $this->burst = $burst;
-        $this->fillRate = $tokens / $second;
+        $this->fillRate = $fillRate;
     }
 
     public function hit(): bool
