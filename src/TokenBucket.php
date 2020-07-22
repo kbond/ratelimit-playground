@@ -35,7 +35,7 @@ final class TokenBucket extends RateLimiter
         $modified = $bucket['modified'] ?? $now;
 
         // determine how many tokens to add since last modified based on drip rate (to a max of burst)
-        $tokens = min($this->burst, $tokens + floor(($now - $modified) * $this->fillRate));
+        $tokens = (int) min($this->burst, $tokens + floor(($now - $modified) * $this->fillRate));
 
         if ($tokens > 0) { // bucket has tokens available
             // decrement tokens and set last modified
@@ -44,13 +44,20 @@ final class TokenBucket extends RateLimiter
                 'modified' => $now,
             ]);
 
-            // expire after "time to fill" based on current count
-            $this->redis->expire($this->key, $this->timeToFill($tokens));
+            $timeToFill = $this->timeToFill($tokens);
 
-            return new RateLimit($tokens);
+            // expire after "time to fill" based on current count
+            $this->redis->expire($this->key, $timeToFill);
+
+            // if bucket empty, set reset to when next token is available
+            // otherwise, set reset to time to fill bucket
+            $resetIn = 0 === $tokens ? ceil(1 / $this->fillRate) : $timeToFill;
+
+            return new RateLimit($tokens, $resetIn);
         }
 
-        throw new RateLimitExceeded();
+        // set reset to when next token will be available
+        throw new RateLimitExceeded(ceil(1 / $this->fillRate));
     }
 
     private function timeToFill(int $tokens): int

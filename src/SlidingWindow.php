@@ -17,26 +17,38 @@ final class SlidingWindow extends WindowRateLimiter
             local limit = tonumber(ARGV[3])
             
             local clearBefore = now - window
+            local resetsAt = now + window
+            
+            -- clear old hits
             redis.call('ZREMRANGEBYSCORE', token, 0, clearBefore)
             
+            -- get # of hits
             local amount = redis.call('ZCARD', token)
+            
+            if amount > 0 then
+                resetsAt = redis.call('ZRANGE', token, 0, 0)[1] + window
+            end
+            
             if amount < limit then
                 redis.call('ZADD', token, now, now)
                 amount = amount + 1
             else
-                return -1
+                return {-1, resetsAt}
             end
+            
             redis.call('EXPIRE', token, window)
             
-            return limit - amount
+            return {limit - amount, resetsAt}
         ";
 
-        $remaining = $this->redis->eval($script, [$this->key, microtime(true), $this->duration, $this->limit], 1);
+        [$remaining, $resetsAt] = $this->redis->eval($script, [$this->key, microtime(true), $this->duration, $this->limit], 1);
+
+        $resetsIn = $resetsAt - time();
 
         if ($remaining < 0) {
-            throw new RateLimitExceeded();
+            throw new RateLimitExceeded($resetsIn);
         }
 
-        return new RateLimit($remaining);
+        return new RateLimit($remaining, $resetsIn);
     }
 }

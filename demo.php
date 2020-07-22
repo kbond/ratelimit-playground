@@ -30,12 +30,13 @@ $hitAll = function(int $num) use ($limiters, &$burstDetector) {
         $burst = ($burstDetector[$key] ?? 0) === time();
         $burstDetector[$key] = time();
 
-        echo sprintf("%s\t%s\t%s\t%s\t\tremaining=%d\n",
+        echo sprintf("%s\t%s\t%s\t%s\t\tremaining=%d; reset=%d\n",
             $num,
             (new ReflectionClass($limiter))->getShortName(),
             date('H:i:s'),
             $burst ? '(burst)' : '',
-            $rateLimit->remaining()
+            $rateLimit->remaining(),
+            $rateLimit->resetsIn(),
         );
     }
 };
