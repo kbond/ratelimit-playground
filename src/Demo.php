@@ -8,7 +8,6 @@ namespace RateLimit;
 final class Demo
 {
     private RateLimiter $limiter;
-    private string $name;
     private int $burstDetector = 0;
 
     public function __construct(RateLimiter $limiter)
@@ -31,6 +30,21 @@ final class Demo
             $rateLimit->resetsIn(),
             $rateLimit->limit(),
         );
+    }
+
+    public function hitAndOutputException(): void
+    {
+        try {
+            $this->hit();
+        } catch (RateLimitExceeded $e) {
+            echo sprintf("%s\t%s\tremaining=%d; reset=%d; limit=%d\n",
+                date('H:i:s'),
+                '(exceeded)',
+                $e->remaining(),
+                $e->resetsIn(),
+                $e->limit(),
+            );
+        }
     }
 
     public function acquire(): void
