@@ -10,15 +10,15 @@ final class FixedWindow extends WindowRateLimiter
     public function hit(): RateLimit
     {
         $now = time();
-        $count = $this->redis->hIncrBy($this->key, 'count', 1);
+        $count = $this->redis->hIncrBy($this->key(), 'count', 1);
 
         if (1 === $count) {
-            $this->redis->hSet($this->key, 'end', $now + $this->duration);
+            $this->redis->hSet($this->key(), 'end', $now + $this->duration);
 
-            $this->redis->expire($this->key, $this->duration);
+            $this->redis->expire($this->key(), $this->duration);
         }
 
-        $resetsIn = $this->redis->hGet($this->key, 'end') - $now;
+        $resetsIn = $this->redis->hGet($this->key(), 'end') - $now;
         $rateLimit = new RateLimit($this->limit - $count, $resetsIn, $this->limit);
 
         if ($count > $this->limit) {

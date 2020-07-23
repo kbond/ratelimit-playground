@@ -17,4 +17,9 @@ abstract class WindowRateLimiter extends RateLimiter
         $this->limit = $limit;
         $this->duration = $duration;
     }
+
+    protected function key(): string
+    {
+        return strtolower((new \ReflectionClass(static::class))->getShortName()).$this->limit.$this->duration;
+    }
 }

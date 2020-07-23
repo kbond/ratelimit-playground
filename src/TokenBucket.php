@@ -24,9 +24,10 @@ final class TokenBucket extends RateLimiter
     public function hit(): RateLimit
     {
         $now = microtime(true);
+        $key = $this->key();
 
         // get bucket
-        $bucket = $this->redis->hGetAll($this->key);
+        $bucket = $this->redis->hGetAll($key);
 
         // get tokens, fill with burst if new
         $tokens = $bucket['tokens'] ?? $this->burst;
@@ -39,7 +40,7 @@ final class TokenBucket extends RateLimiter
 
         if ($tokens > 0) { // bucket has tokens available
             // decrement tokens and set last modified
-            $this->redis->hMSet($this->key, [
+            $this->redis->hMSet($key, [
                 'tokens' => --$tokens,
                 'modified' => $now,
             ]);
@@ -47,7 +48,7 @@ final class TokenBucket extends RateLimiter
             $timeToFill = $this->timeToFill($tokens);
 
             // expire after "time to fill" based on current count
-            $this->redis->expire($this->key, $timeToFill);
+            $this->redis->expire($key, $timeToFill);
 
             // if bucket empty, set reset to when next token is available
             // otherwise, set reset to time to fill bucket
@@ -58,6 +59,11 @@ final class TokenBucket extends RateLimiter
 
         // set reset to when next token will be available
         throw new RateLimitExceeded(new RateLimit($tokens, ceil(1 / $this->fillRate), $this->burst));
+    }
+
+    protected function key(): string
+    {
+        return strtolower((new \ReflectionClass(static::class))->getShortName()).$this->burst.$this->fillRate;
     }
 
     private function timeToFill(int $tokens): int

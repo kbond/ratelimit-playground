@@ -41,7 +41,7 @@ final class SlidingWindow extends WindowRateLimiter
             return {limit - amount, resetsAt}
         ";
 
-        [$remaining, $resetsAt] = $this->redis->eval($script, [$this->key, microtime(true), $this->duration, $this->limit], 1);
+        [$remaining, $resetsAt] = $this->redis->eval($script, [$this->key(), microtime(true), $this->duration, $this->limit], 1);
 
         $rateLimit = new RateLimit($remaining, $resetsAt - time(), $this->limit);
 

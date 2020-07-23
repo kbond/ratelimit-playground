@@ -8,13 +8,11 @@ namespace RateLimit;
 abstract class RateLimiter
 {
     protected $redis;
-    protected $key;
 
     public function __construct()
     {
         $this->redis = new \Redis();
         $this->redis->connect('localhost');
-        $this->key = strtolower((new \ReflectionClass(static::class))->getShortName());
     }
 
     /**
@@ -24,6 +22,8 @@ abstract class RateLimiter
 
     public function reset(): void
     {
-        $this->redis->del($this->key);
+        $this->redis->del($this->key());
     }
+
+    abstract protected function key(): string;
 }
