@@ -49,6 +49,6 @@ final class SlidingWindow extends WindowRateLimiter
             throw new RateLimitExceeded($resetsIn);
         }
 
-        return new RateLimit($remaining, $resetsIn);
+        return new RateLimit($remaining, $resetsIn, $this->limit);
     }
 }

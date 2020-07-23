@@ -24,6 +24,6 @@ final class FixedWindow extends WindowRateLimiter
             throw new RateLimitExceeded($resetsIn);
         }
 
-        return new RateLimit($this->limit - $count, $resetsIn);
+        return new RateLimit($this->limit - $count, $resetsIn, $this->limit);
     }
 }

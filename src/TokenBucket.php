@@ -53,7 +53,7 @@ final class TokenBucket extends RateLimiter
             // otherwise, set reset to time to fill bucket
             $resetIn = 0 === $tokens ? ceil(1 / $this->fillRate) : $timeToFill;
 
-            return new RateLimit($tokens, $resetIn);
+            return new RateLimit($tokens, $resetIn, $this->burst);
         }
 
         // set reset to when next token will be available

@@ -24,11 +24,12 @@ final class Demo
         $isBurst = $this->burstDetector === $now;
         $this->burstDetector = $now;
 
-        echo sprintf("%s\t%s\t\tremaining=%d; reset=%d\n",
+        echo sprintf("%s\t%s\t\tremaining=%d; reset=%d; limit=%d\n",
             date('H:i:s'),
             $isBurst ? '(burst)' : '',
             $rateLimit->remaining(),
             $rateLimit->resetsIn(),
+            $rateLimit->limit(),
         );
     }
 
