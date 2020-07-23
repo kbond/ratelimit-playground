@@ -57,7 +57,7 @@ final class TokenBucket extends RateLimiter
         }
 
         // set reset to when next token will be available
-        throw new RateLimitExceeded(ceil(1 / $this->fillRate));
+        throw new RateLimitExceeded(new RateLimit($tokens, ceil(1 / $this->fillRate), $this->burst));
     }
 
     private function timeToFill(int $tokens): int

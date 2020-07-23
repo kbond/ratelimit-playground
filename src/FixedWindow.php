@@ -19,11 +19,12 @@ final class FixedWindow extends WindowRateLimiter
         }
 
         $resetsIn = $this->redis->hGet($this->key, 'end') - $now;
+        $rateLimit = new RateLimit($this->limit - $count, $resetsIn, $this->limit);
 
         if ($count > $this->limit) {
-            throw new RateLimitExceeded($resetsIn);
+            throw new RateLimitExceeded($rateLimit);
         }
 
-        return new RateLimit($this->limit - $count, $resetsIn, $this->limit);
+        return $rateLimit;
     }
 }

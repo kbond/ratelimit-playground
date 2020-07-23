@@ -7,17 +7,27 @@ namespace RateLimit;
  */
 final class RateLimitExceeded extends \RuntimeException
 {
-    private int $resetsIn;
+    private RateLimit $rateLimit;
 
-    public function __construct(int $resetsIn)
+    public function __construct(RateLimit $rateLimit)
     {
         parent::__construct();
 
-        $this->resetsIn = $resetsIn;
+        $this->rateLimit = $rateLimit;
+    }
+
+    public function remaining(): int
+    {
+        return $this->rateLimit->remaining();
     }
 
     public function resetsIn(): int
     {
-        return $this->resetsIn;
+        return $this->rateLimit->resetsIn();
+    }
+
+    public function limit(): int
+    {
+        return $this->rateLimit->limit();
     }
 }
